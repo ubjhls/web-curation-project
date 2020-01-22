@@ -2,6 +2,14 @@
 제외하여 개발합니다. -->
 <template>
     <div class="user join">
+        <div class="header" style="width:100%; height:auto">
+            <div style="width:10%; float:left;">
+            <button v-on:click="goBack">
+                <img src="../../assets/images/backIcon.png" style="width:100%;">
+            </button>
+            </div>
+            <p style="vertical-align: middle;padding: 8px 5px;float:left;">회원가입</p>
+        </div>
         <div class="wrapC">
             <h1>TEST</h1>
                  <div style="width:80%; float:left">
@@ -10,13 +18,19 @@
                  </div>
         
                  <div style="width:20%; float:left">
-                    <button class="check-button">중복체크</button>
+                    <button class="check-button" @click="checkEmail">중복체크</button>
                  </div>
                  
                  <div style="clear:both"></div>
       
                 <div class="error-text" v-if="error.email">
                     {{error.email}}
+                </div>
+                 <div class="error-text" v-if="exist_email_confirm === 'a'">
+                    {{ exist_email }}
+                </div>
+                <div class="error-textt" v-else-if="exist_email_confirm ==='b'"> 
+                    {{ exist_email }}
                 </div>
                 <br>
            
@@ -33,7 +47,12 @@
                 <div class="error-text" v-if="error.nickName">
                     {{error.nickName}}
                 </div>
-                
+                <div class="error-text" v-if="exist_nickName_confirm === 'a'">
+                    {{ exist_nickName }}
+                </div>
+                <div class="error-textt" v-else-if="exist_nickName_confirm ==='b'"> 
+                    {{ exist_nickName }}
+                </div>
                 <br>
            
             <div>
@@ -78,7 +97,11 @@
                 </div>
             </div>
             <br>
-            <v-text-field style="color:blue" v-model="introduce" id="introduce" label="한줄소개" hide-details="auto"></v-text-field>
+            <v-text-field style="color:blue" v-model="intro" id="intro" label="한줄소개" hide-details="auto"></v-text-field>
+            <div class="error-text" v-if="error.intro">
+                    {{error.intro}}
+                </div>
+            <br>
             <br>
             <label>
                 <input v-model="isTerm" type="checkbox" id="term"/>
@@ -117,7 +140,7 @@
                 .digits()
                 .has()
                 .letters();
-
+                
             if(this.$route.params.nickName != null) {
                 this.nickName = this.$route.params.nickName;
             }
@@ -127,8 +150,8 @@
             if(this.$route.params.name != null) {
                 this.name = this.$route.params.name;
             }
-            if(this.$route.params.introduce != null) {
-                this.introduce = this.$route.params.introduce;
+            if(this.$route.params.intro != null) {
+                this.intro = this.$route.params.intro;
             }
         },
         watch: {
@@ -146,44 +169,82 @@
             },
             isTerm: function (v) {
                 this.checkForm();
+            },
+            name: function (v) {
+                this.checkForm();
+            },
+            intro: function (v) {
+                this.checkForm();
+            },
+            exist_nickName: function (v) {
+                this.checkForm();
+            },
+            exist_email: function (v) {
+                this.checkForm();
             }
         },methods: {
+            goBack() {
+                var router = this.$router;
+                router.go(-1)
+            },
             checkNick() { //중복체크 버튼
-                if (!this.isCheck) {
-                    var router = this.$router;
-
-                    let {nickName} = this;
-                    let data = {
-                        nickName
-                    }
-                    //요청 후에는 버튼 비활성화
-                    this.isCheck = true;
-
-                    UserApi.requestCheckNick(data, res =>{
-                        //통신을 통해 전달받은 값 콘솔에 출력
-                        if(res) {
-                            this.exist_nickName = '존재하는 닉네임입니다. 다시 설정해주세요.';
-                            this.isCheck = false;
-                        }
-                        else {      //닉네임 가능
-                            this.exist_nickName = false;
-                            this.isCheck = true;
-                        }
-                        //요청이 끝나면 버튼 활성화
-                    },error=>{  
-                        //요청이 끝나면 버튼 활성화
-                        this.isCheck = false;
-
-                        var router = this.$router;
-
-                        router.push({name:"Errorpage",params:{
-                            "nickName" : this.nickName,
-                            "email" : this.email,
-                            "route" : this.$route.name
-                        }});
-                        this.isSubmit = true;
-                    })
+                var router = this.$router;
+                let {nickName} = this;
+                let data = {
+                    nickName
                 }
+                //요청 후에는 버튼 비활성화
+                this.isCheck = true;
+                UserApi.requestCheckNick(data, res =>{
+                    //통신을 통해 전달받은 값 콘솔에 출력
+                    console.log(res)    
+                    if(res) {
+                        this.exist_nickName = '존재하는 닉네임입니다. 다시 설정해주세요.';
+                        this.exist_nickName_confirm = 'a'
+                    }
+                    else {      //닉네임 가능
+                        this.exist_nickName = '사용가능한 닉네임입니다.';
+                        this.exist_nickName_confirm = 'b'
+                    }
+                    //요청이 끝나면 버튼 활성화
+                },error=>{  
+                    var router = this.$router;
+                    router.push({name:"ErrorPage",params:{
+                        "nickName" : this.nickName,
+                        "email" : this.email,
+                        "route" : this.$route.name
+                    }});
+                    this.isSubmit = true;
+                })
+                
+            },
+            checkEmail() {
+                var router = this.$router;
+                let {email} = this;
+                let data = {
+                    email
+                }
+                this.isCheck = true;
+                UserApi.requestCheckEmail(data, res =>{
+                    console.log(res)
+                    if(res) {
+                        this.exist_email = '존재하는 이메일입니다. 다시 설정해주세요.';
+                        this.exist_email_confirm = 'a';
+                    }
+                    else {
+                        this.exist_email = '사용가능한 이메일입니다.';
+                        this.exist_email_confirm = 'b';
+                    }
+                },error=>{  
+                    var router = this.$router;
+                    router.push({name:"ErrorPage",params:{
+                        "nickName" : this.nickName,
+                        "email" : this.email,
+                        "route" : this.$route.name
+                    }});
+                    this.isSubmit = true;
+                })
+                
             },
 
             
@@ -206,6 +267,19 @@
                 else 
                     this.error.password = false;
 
+                if (this.name.length > 5)   
+                    this.error.name = "이름은 2 ~ 5자 이내로 작성해주세요";
+                else if(this.name.length < 2)
+                    this.error.name = "이름은 2 ~ 5자 이내로 작성해주세요"
+                else   
+                    this.error.name = false
+
+                if (this.intro.length < 2)
+                    this.error.intro = "자기소개는 2 ~ 20자 이내로 작성해주세요";
+                else if(this.intro.length > 20)
+                    this.error.intro = "자기소개는 2 ~ 20자 이내로 작성해주세요"
+                else   
+                    this.error.intro = false
 
                 if(this.password.length >= 8) {
                     if (this.passwordConfirm == this.password) {
@@ -215,6 +289,15 @@
                     else 
                         this.error.passwordConfirm = '비밀번호가 일치하지 않습니다.'
                 }
+                if(this.exist_email !== '사용가능한 이메일입니다.')
+                    this.error.exist_email = true
+                else
+                    this.error.exist_email = false
+                if(this.exist_nickName !== '사용가능한 닉네임입니다.')
+                    this.error.exist_nickName = true
+                else
+                    this.error.exist_nickName = false
+
 
                 if(this.isTerm)
                     this.error.isTerm = false;
@@ -234,13 +317,13 @@
             },
             submit() {
                 if (this.isSubmit) {
-                    let {nickName, email, password, name, introduce} = this;
+                    let {nickName, email, password, name, intro} = this;
                     let data = {
                         nickName,
                         email,
                         password,
                         name,
-                        introduce,
+                        intro,
                     }
                     //요청 후에는 버튼 비활성화
                     this.isSubmit = false;
@@ -255,7 +338,7 @@
                                     "email": this.email,
                                     "password": this.password,
                                     "name": this.name,
-                                    "introduce": this.introduce
+                                    "intro": this.intro
                                 }
                             });
                         } else if(res == 'hasNick') {
@@ -274,7 +357,7 @@
                             "email" : this.email,
                             "password" : this.password,
                             "name" : this.name,
-                            "introduce": this.introduce,
+                            "intro": this.intro,
                             "route" : this.$route.name
                         }});
                     })
@@ -283,7 +366,7 @@
         },
         data: () => {
             return {
-                introduce: '',
+                intro: '',
                 name: '',
                 email: '',
                 password: '',
@@ -293,18 +376,23 @@
                 isTerm: false,
                 isLoading: false,
                 error: {
+                    exist_nickName:false,   
+                    exist_email:false,
+                    name: false,
                     nickName: false,
                     email: false,
                     password: false,
                     passwordConfirm: false,
                     term: false,
+                    intro: false,
                 },
                 isCheck: false,
                 isSubmit: false,
                 termPopup: false,
                 exist_email: false,
-                exist_nickName: false
-
+                exist_email_confirm: false,
+                exist_nickName: false,
+                exist_nickName_confirm: false,
             }
         }
 

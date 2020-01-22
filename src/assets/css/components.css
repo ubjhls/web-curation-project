@@ -88,6 +88,11 @@
       float: left;
       color: #EE4B55;
       margin-top: 3px; }
+    .components-page .input-with-label .error-text-ok {
+      width: 100%;
+      float: left;
+      color: rgb(46, 77, 212);
+      margin-top: 3px; }
     .components-page .input-with-label .eyes-icon {
       position: absolute;
       font-size: 1em;

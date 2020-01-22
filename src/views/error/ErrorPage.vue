@@ -20,7 +20,7 @@
         data: () => {
             return {
                 name:"",
-                introduce:"",
+                intro:"",
                 nickName:"",
                 email:"",
                 password:"",
@@ -46,7 +46,7 @@
                         "email" : this.$route.params.email,
                         "password" : this.$route.params.password,
                         "name": this.$route.params.name,
-                        "introduce": this.$route.params.introduce,  
+                        "intro": this.$route.params.intro,  
                         "route" : this.$route.name
                     }})
                 } else if(route == 'Login'){
